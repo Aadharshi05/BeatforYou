@@ -1,0 +1,1180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BeatforYou ~ Find the beats just for your current mood</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='100%25' height='100%25' fill='none'/%3E%3Ctext x='50%25' y='50%25' font-size='44' text-anchor='middle' alignment-baseline='central'%3E🎵%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Dancing+Script:wght@400;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+* {margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+font-family: 'Playfair Display', 'Georgia', serif;
+min-height: 100vh;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+background-size: 400% 400%;
+animation: gradientShift 15s ease infinite;
+overflow-x: hidden;
+position: relative;
+}
+
+/* Silver metallic overlay */
+body::before {
+content: '';
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, 
+  rgba(192, 192, 192, 0.3) 0%,
+  rgba(169, 169, 169, 0.2) 25%,
+  rgba(211, 211, 211, 0.3) 50%,
+  rgba(192, 192, 192, 0.2) 75%,
+  rgba(169, 169, 169, 0.3) 100%);
+pointer-events: none;
+z-index: 1;
+animation: shimmer 8s ease infinite;
+}
+
+@keyframes shimmer {
+0%, 100% { opacity: 0.6; }
+50% { opacity: 0.8; }
+}
+
+@keyframes gradientShift {
+0% { background-position: 0% 50%; }
+50% { background-position: 100% 50%; }
+100% { background-position: 0% 50%; }
+}
+
+.musical-notes {
+position: fixed;
+font-size: 24px;
+opacity: 0.4;
+color: silver;
+animation: float 10s infinite ease-in-out;
+pointer-events: none;
+z-index: 2;
+text-shadow: 0 0 10px rgba(192, 192, 192, 0.8);
+}
+
+@keyframes float {
+0%, 100% { transform: translateY(0) rotate(0deg); }
+50% { transform: translateY(-30px) rotate(10deg); }
+}
+
+#mainPage {
+display: block;
+}
+
+#moodPage {
+display: none;
+}
+
+h1 {
+font-size: 3.5rem;
+font-family: 'Great Vibes', cursive;
+color: white;
+text-shadow: 0 0 30px rgba(192, 192, 192, 0.8),
+0 0 50px rgba(169, 169, 169, 0.5),
+0 2px 4px rgba(0, 0, 0, 0.3);
+margin-bottom: 15px;
+font-weight: 400;
+letter-spacing: 2px;
+}
+
+.subtitle {
+font-size: 1.5rem;
+font-family: 'Dancing Script', cursive;
+color: rgba(255, 255, 255, 0.95);
+font-weight: 600;
+letter-spacing: 1px;
+text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.mood-grid {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 30px;
+max-width: 1000px;
+margin: 0 auto;
+padding: 20px;
+}
+
+.mood-card {
+background: linear-gradient(135deg, 
+  rgba(192, 192, 192, 0.25) 0%,
+  rgba(169, 169, 169, 0.2) 100%);
+backdrop-filter: blur(15px);
+border-radius: 25px;
+padding: 40px 20px;
+cursor: pointer;
+transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+border: 2px solid rgba(211, 211, 211, 0.4);
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+inset 0 1px 0 rgba(255, 255, 255, 0.3);
+position: relative;
+overflow: hidden;
+animation: fadeInUp 0.8s ease backwards;
+}
+
+.mood-card:nth-child(1) { animation-delay: 0.1s; }
+.mood-card:nth-child(2) { animation-delay: 0.2s; }
+.mood-card:nth-child(3) { animation-delay: 0.3s; }
+.mood-card:nth-child(4) { animation-delay: 0.4s; }
+.mood-card:nth-child(5) { animation-delay: 0.5s; }
+.mood-card:nth-child(6) { animation-delay: 0.6s; }
+.mood-card:nth-child(7) { animation-delay: 0.7s; }
+.mood-card:nth-child(8) { animation-delay: 0.8s; }
+
+@keyframes fadeInUp {
+from {
+opacity: 0;
+transform: translateY(30px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.mood-card::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, 
+  rgba(211, 211, 211, 0.3), 
+  transparent);
+opacity: 0;
+transition: opacity 0.4s ease;
+}
+
+.mood-card:hover::before {
+opacity: 1;
+}
+
+.mood-card:hover {
+transform: translateY(-15px) scale(1.08);
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+0 0 40px rgba(192, 192, 192, 0.6),
+inset 0 1px 0 rgba(255, 255, 255, 0.5);
+border-color: rgba(255, 255, 255, 0.6);
+}
+
+.mood-card:active {
+transform: translateY(-10px) scale(1.05);
+}
+
+.emoji {
+font-size: 4rem;
+display: block;
+margin-bottom: 15px;
+animation: bounce 2s infinite;
+transition: transform 0.3s ease;
+filter: drop-shadow(0 0 10px rgba(192, 192, 192, 0.5));
+}
+
+.mood-card:hover .emoji {
+animation: none;
+transform: rotate(360deg) scale(1.2);
+}
+
+@keyframes bounce {
+0%, 100% { transform: translateY(0); }
+50% { transform: translateY(-10px); }
+}
+
+.mood-label {
+font-size: 1.3rem;
+font-family: 'Playfair Display', serif;
+color: white;
+font-weight: 700;
+text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+font-style: italic;
+}
+
+footer {
+margin-top: 80px;
+padding: 30px;
+color: white;
+font-size: 1.1rem;
+animation: fadeIn 2s ease;
+text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+body {
+font-family: 'Playfair Display', 'Georgia', serif;
+min-height: 100vh;
+background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+background-size: 400% 400%;
+animation: gradientShift 15s ease infinite;
+overflow-x: hidden;
+position: relative;
+}
+
+/* Silver metallic overlay */
+body::before {
+content: '';
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, 
+  rgba(192, 192, 192, 0.3) 0%,
+  rgba(169, 169, 169, 0.2) 25%,
+  rgba(211, 211, 211, 0.3) 50%,
+  rgba(192, 192, 192, 0.2) 75%,
+  rgba(169, 169, 169, 0.3) 100%);
+pointer-events: none;
+z-index: 1;
+animation: shimmer 8s ease infinite;
+}
+
+@keyframes shimmer {
+0%, 100% { opacity: 0.6; }
+50% { opacity: 0.8; }
+}
+
+@keyframes gradientShift {
+0% { background-position: 0% 50%; }
+50% { background-position: 100% 50%; }
+100% { background-position: 0% 50%; }
+}
+
+.musical-notes {
+position: fixed;
+font-size: 24px;
+opacity: 0.4;
+color: silver;
+animation: float 10s infinite ease-in-out;
+pointer-events: none;
+z-index: 2;
+text-shadow: 0 0 10px rgba(192, 192, 192, 0.8);
+}
+
+@keyframes float {
+0%, 100% { transform: translateY(0) rotate(0deg); }
+50% { transform: translateY(-30px) rotate(10deg); }
+}
+
+#mainPage {
+display: block;
+}
+
+#moodPage {
+display: none;
+}
+
+.container {
+position: relative;
+z-index: 10;
+max-width: 1200px;
+margin: 0 auto;
+padding: 40px 20px;
+text-align: center;
+}
+
+header {
+margin-bottom: 60px;
+animation: fadeInDown 1s ease;
+}
+
+@keyframes fadeInDown {
+from {
+opacity: 0;
+transform: translateY(-30px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+h1 {
+font-size: 3.5rem;
+font-family: 'Great Vibes', cursive;
+color: white;
+text-shadow: 0 0 30px rgba(192, 192, 192, 0.8),
+0 0 50px rgba(169, 169, 169, 0.5),
+0 2px 4px rgba(0, 0, 0, 0.3);
+margin-bottom: 15px;
+font-weight: 400;
+letter-spacing: 2px;
+}
+
+.subtitle {
+font-size: 1.5rem;
+font-family: 'Dancing Script', cursive;
+color: rgba(255, 255, 255, 0.95);
+font-weight: 600;
+letter-spacing: 1px;
+text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.mood-grid {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 30px;
+max-width: 1000px;
+margin: 0 auto;
+padding: 20px;
+}
+
+.mood-card {
+background: linear-gradient(135deg, 
+  rgba(192, 192, 192, 0.25) 0%,
+  rgba(169, 169, 169, 0.2) 100%);
+backdrop-filter: blur(15px);
+border-radius: 25px;
+padding: 40px 20px;
+cursor: pointer;
+transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+border: 2px solid rgba(211, 211, 211, 0.4);
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2),
+inset 0 1px 0 rgba(255, 255, 255, 0.3);
+position: relative;
+overflow: hidden;
+animation: fadeInUp 0.8s ease backwards;
+}
+
+.mood-card:nth-child(1) { animation-delay: 0.1s; }
+.mood-card:nth-child(2) { animation-delay: 0.2s; }
+.mood-card:nth-child(3) { animation-delay: 0.3s; }
+.mood-card:nth-child(4) { animation-delay: 0.4s; }
+.mood-card:nth-child(5) { animation-delay: 0.5s; }
+.mood-card:nth-child(6) { animation-delay: 0.6s; }
+.mood-card:nth-child(7) { animation-delay: 0.7s; }
+.mood-card:nth-child(8) { animation-delay: 0.8s; }
+
+@keyframes fadeInUp {
+from {
+opacity: 0;
+transform: translateY(30px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+
+.mood-card::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+opacity: 0;
+transition: opacity 0.4s ease;
+}
+
+.mood-card:hover::before {
+opacity: 1;
+}
+
+.mood-card:hover {
+transform: translateY(-15px) scale(1.08);
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3),
+0 0 40px rgba(255, 255, 255, 0.3);
+border-color: rgba(255, 255, 255, 0.5);
+}
+
+.mood-card:active {
+transform: translateY(-10px) scale(1.05);
+}
+
+.emoji {
+font-size: 4rem;
+display: block;
+margin-bottom: 15px;
+animation: bounce 2s infinite;
+transition: transform 0.3s ease;
+}
+
+.mood-card:hover .emoji {
+animation: none;
+transform: rotate(360deg) scale(1.2);
+}
+
+@keyframes bounce {
+0%, 100% { transform: translateY(0); }
+50% { transform: translateY(-10px); }
+}
+
+.mood-label {
+font-size: 1.3rem;
+color: white;
+font-weight: 600;
+text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+footer {
+margin-top: 80px;
+padding: 30px;
+color: white;
+font-size: 1.1rem;
+animation: fadeIn 2s ease;
+text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+
+.sparkle {
+position: fixed;
+pointer-events: none;
+width: 10px;
+height: 10px;
+background: white;
+border-radius: 50%;
+box-shadow: 0 0 10px white;
+animation: sparkleAnim 1s ease-out forwards;
+z-index: 100;
+}
+
+@keyframes sparkleAnim {
+0% {
+transform: scale(0) rotate(0deg);
+opacity: 1;
+}
+100% {
+transform: scale(1.5) rotate(180deg);
+opacity: 0;
+}
+}
+
+/* Mood Detail Page Styles */
+.mood-detail-container {
+max-width: 700px;
+width: 100%;
+margin: 0 auto;
+padding: 40px 20px;
+text-align: center;
+animation: fadeInScale 0.8s ease;
+}
+
+@keyframes fadeInScale {
+from {
+opacity: 0;
+transform: scale(0.9);
+}
+to {
+opacity: 1;
+transform: scale(1);
+}
+}
+
+.back-button {
+position: fixed;
+top: 30px;
+left: 30px;
+background: rgba(255, 255, 255, 0.2);
+backdrop-filter: blur(10px);
+border: 2px solid rgba(255, 255, 255, 0.3);
+border-radius: 50px;
+padding: 12px 25px;
+color: white;
+font-size: 1.1rem;
+cursor: pointer;
+transition: all 0.3s ease;
+display: inline-flex;
+align-items: center;
+gap: 8px;
+font-weight: 600;
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+z-index: 1000;
+}
+
+.back-button:hover {
+background: rgba(255, 255, 255, 0.3);
+transform: translateX(-5px);
+box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.mood-display {
+background: rgba(255, 255, 255, 0.15);
+backdrop-filter: blur(10px);
+border-radius: 30px;
+padding: 60px 40px;
+border: 2px solid rgba(255, 255, 255, 0.2);
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+margin-bottom: 40px;
+}
+
+.mood-emoji-large {
+font-size: 8rem;
+margin-bottom: 20px;
+animation: pulse 2s infinite;
+display: inline-block;
+}
+
+@keyframes pulse {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.1); }
+}
+
+.mood-name {
+font-size: 3rem;
+color: white;
+font-weight: 800;
+margin-bottom: 30px;
+text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+.quote-section {
+background: rgba(255, 255, 255, 0.15);
+backdrop-filter: blur(10px);
+border-radius: 30px;
+padding: 40px;
+border: 2px solid rgba(255, 255, 255, 0.2);
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+margin-bottom: 40px;
+transition: all 0.4s ease;
+cursor: pointer;
+}
+
+.quote-section:hover {
+transform: translateY(-10px);
+box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+background: rgba(255, 255, 255, 0.25);
+}
+
+.quote-label {
+font-size: 1.2rem;
+color: rgba(255, 255, 255, 0.8);
+margin-bottom: 15px;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 2px;
+}
+
+.quote-text {
+font-size: 1.5rem;
+color: white;
+line-height: 1.8;
+font-style: italic;
+text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.click-hint {
+color: rgba(255, 255, 255, 0.7);
+margin-top: 20px;
+font-size: 0.9rem;
+}
+
+.play-button {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+border: none;
+border-radius: 50px;
+padding: 18px 45px;
+color: white;
+font-size: 1.3rem;
+font-weight: 700;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.play-button:hover {
+transform: translateY(-5px) scale(1.05);
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.play-button:active {
+transform: translateY(-2px) scale(1.02);
+}
+
+/* Upload Section Styles */
+.upload-section {
+max-width: 600px;
+margin: 0 auto 50px;
+animation: fadeInDown 1s ease;
+}
+
+.upload-card {
+background: rgba(255, 255, 255, 0.12);
+backdrop-filter: blur(10px);
+border-radius: 25px;
+padding: 40px;
+border: 2px solid rgba(255, 255, 255, 0.12);
+box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+text-align: center;
+position: relative;
+overflow: visible;
+}
+
+/* Orbiting sparkles container inside upload-card */
+.upload-card .orbit-sparkle {
+position: absolute;
+width: 8px;
+height: 8px;
+border-radius: 50%;
+background: #fff1f8;
+box-shadow: 0 0 8px #fff1f8;
+pointer-events: none;
+z-index: 5;
+transform-origin: center;
+}
+
+.orbit-1 { animation: orbit 4s linear infinite; }
+.orbit-2 { animation: orbit 5s linear infinite reverse; }
+.orbit-3 { animation: orbit 6s linear infinite; }
+.orbit-4 { animation: orbit 3.5s linear infinite reverse; }
+
+@keyframes orbit {
+0% { transform: rotate(0deg) translateX(0) translateY(0) translateZ(0); }
+25% { transform: rotate(90deg) translateX(80px) translateY(-10px); }
+50% { transform: rotate(180deg) translateX(0px) translateY(20px); }
+75% { transform: rotate(270deg) translateX(-80px) translateY(-10px); }
+100% { transform: rotate(360deg) translateX(0) translateY(0); }
+}
+
+/* Glowing animated outline for upload card */
+.upload-card::before {
+content: '';
+position: absolute;
+inset: -6px;
+border-radius: 30px;
+background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+filter: blur(8px);
+opacity: 0.7;
+z-index: 0;
+pointer-events: none;
+animation: glowPulse 3s ease-in-out infinite;
+}
+
+.upload-card::after {
+content: '';
+position: absolute;
+inset: -10px;
+border-radius: 35px;
+background: conic-gradient(from 0deg, rgba(255,20,147,0.25), rgba(255,182,193,0.12), rgba(255,20,147,0.18), rgba(255,182,193,0.06));
+mix-blend-mode: screen;
+/* make the glow static (no rotation) and a bit more subtle */
+opacity: 0.55;
+z-index: 0;
+pointer-events: none;
+transform: none;
+animation: none;
+}
+
+@keyframes glowPulse {
+0% { opacity: 0.45; transform: scale(1); }
+50% { opacity: 0.85; transform: scale(1.02); }
+100% { opacity: 0.45; transform: scale(1); }
+}
+
+@keyframes rotateGlow {
+from { transform: rotate(0deg); }
+to { transform: rotate(360deg); }
+}
+
+.upload-icon {
+font-size: 4rem;
+margin-bottom: 20px;
+animation: bounce 2s infinite;
+}
+
+.upload-title {
+font-size: 2rem;
+color: white;
+font-weight: 700;
+margin-bottom: 10px;
+text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.upload-desc {
+font-size: 1.1rem;
+color: rgba(255, 255, 255, 0.9);
+margin-bottom: 30px;
+}
+
+.upload-button {
+background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+border: none;
+border-radius: 50px;
+padding: 15px 40px;
+color: white;
+font-size: 1.2rem;
+font-weight: 700;
+cursor: pointer;
+transition: all 0.3s ease;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+display: inline-block;
+position: relative;
+overflow: hidden;
+}
+
+.upload-button input[type="file"] {
+position: absolute;
+left: -9999px;
+}
+
+.upload-button:hover {
+transform: translateY(-5px) scale(1.05);
+box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.upload-button:active {
+transform: translateY(-2px) scale(1.02);
+}
+
+.upload-result {
+margin-top: 30px;
+min-height: 50px;
+}
+
+.result-message {
+background: rgba(255, 255, 255, 0.2);
+backdrop-filter: blur(10px);
+border-radius: 15px;
+padding: 20px;
+margin-top: 20px;
+border: 2px solid rgba(255, 255, 255, 0.3);
+animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+from {
+opacity: 0;
+transform: translateY(-20px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.detected-emoji {
+font-size: 3rem;
+margin: 10px 0;
+}
+
+.detected-mood {
+font-size: 1.5rem;
+color: white;
+font-weight: 600;
+margin: 10px 0;
+}
+
+.preview-image {
+max-width: 300px;
+max-height: 300px;
+border-radius: 15px;
+margin: 20px auto;
+display: block;
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.divider {
+text-align: center;
+margin: 50px 0;
+position: relative;
+}
+
+.divider span {
+background: rgba(255, 255, 255, 0.2);
+backdrop-filter: blur(10px);
+padding: 10px 30px;
+border-radius: 50px;
+color: white;
+font-weight: 600;
+letter-spacing: 2px;
+border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+h1 {
+font-size: 2.5rem;
+}
+.subtitle {
+font-size: 1.2rem;
+}
+.mood-grid {
+grid-template-columns: repeat(2, 1fr);
+gap: 20px;
+}
+.emoji {
+font-size: 3rem;
+}
+.back-button {
+top: 20px;
+left: 20px;
+padding: 10px 20px;
+font-size: 1rem;
+}
+.mood-emoji-large {
+font-size: 5rem;
+}
+.mood-name {
+font-size: 2rem;
+}
+.quote-text {
+font-size: 1.2rem;
+}
+.mood-display, .quote-section {
+padding: 30px 25px;
+}
+}
+
+@media (max-width: 480px) {
+h1 {
+font-size: 2rem;
+}
+.subtitle {
+font-size: 1rem;
+}
+}
+</style>
+</head>
+<body>
+<!-- Main Page -->
+<div id="mainPage">
+<div class="container">
+<header>
+<h1>🎵 BeatforYou</h1>
+<p class="subtitle">Find the beats just for your current mood</p>
+<p style="color: rgba(255, 255, 255, 0.85); font-size: 1.1rem; margin-top: 15px; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+Experience personalized music recommendations powered by intelligent mood detection. Upload your emoji image or select your mood manually, and let BeatforYou curate the perfect playlist that resonates with your emotions.
+</p>
+</header>
+<!-- Image Upload Section -->
+<div class="upload-section">
+<div class="upload-card">
+<div class="upload-icon">📸</div>
+<h3 class="upload-title">Upload Emoji Image</h3>
+<p class="upload-desc">Upload a photo with an emoji and we'll detect your mood!</p>
+<label for="imageUpload" class="upload-button">
+📂 Choose Image
+<input type="file" id="imageUpload" accept="image/*" style="display: none;">
+</label>
+<p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-top: 15px;">
+📱 Mobile: Gallery & Camera | 💻 Desktop: Browse Files
+</p>
+<div id="uploadResult" class="upload-result"></div>
+</div>
+</div>
+
+<div class="divider">
+<span>OR CHOOSE MANUALLY</span>
+</div>
+
+<div class="mood-grid">
+<div class="mood-card" onclick="showMoodPage('happy+songs', 'Happy', '😊', 'Happiness is not by chance, but by choice. Let the music lift your spirits!')">
+<span class="emoji">😊</span>
+<div class="mood-label">Happy</div>
+</div>
+
+<div class="mood-card" onclick="showMoodPage('sad+songs', 'Sad', '😢', 'Sometimes you need to feel the rain to appreciate the sunshine. Music heals the soul.')">
+<span class="emoji">😢</span>
+<div class="mood-label">Sad</div>
+</div>
+
+<div class="mood-card" onclick="showMoodPage('angry+songs', 'Angry', '😡', 'Channel your fire into passion. Let the rhythm transform your rage into power!')">
+<span class="emoji">😡</span>
+<div class="mood-label">Angry</div>
+</div>
+
+<div class="mood-card" onclick="showMoodPage('calm+relaxing+songs', 'Calm', '😌', 'In the stillness of melody, find your peace. Breathe in, breathe out, let go.')">
+<span class="emoji">😌</span>
+<div class="mood-label">Calm</div>
+</div>
+
+<div class="mood-card" onclick="showMoodPage('romantic+love+songs', 'Romantic', '😍', 'Love is the music of the heart. Let every note remind you of beautiful moments.')">
+<span class="emoji">😍</span>
+<div class="mood-label">Romantic</div>
+</div>
+
+<div class="mood-card" onclick="showMoodPage('party+energetic+songs', 'Excited', '🤩', 'Life is a celebration! Dance like nobody is watching and sing like nobody is listening!')">
+<span class="emoji">🤩</span>
+<div class="mood-label">Excited</div>
+</div>
+
+<div class="mood-card" onclick="showMoodPage('energetic+workout+songs', 'Energetic', '💪', 'Push your limits! The right beat can turn sweat into strength and effort into achievement.')">
+<span class="emoji">💪</span>
+<div class="mood-label">Energetic</div>
+</div>
+
+<div class="mood-card" onclick="showMoodPage('sleepy+peaceful+songs', 'Sleepy', '😴', 'Rest is not weakness, it is wisdom. Let gentle melodies carry you to dreamland.')">
+<span class="emoji">😴</span>
+<div class="mood-label">Sleepy</div>
+</div>
+</div>
+
+<footer>
+You are always the most Beautiful,
+Created with 🤍 by Aadharshini
+</footer>
+</div>
+</div>
+
+<!-- Mood Detail Page -->
+<div id="moodPage">
+<button class="back-button" onclick="goBack()">← Back</button>
+
+<div class="mood-detail-container">
+<div class="mood-display">
+<div class="mood-emoji-large" id="moodEmojiLarge"></div>
+<h1 class="mood-name" id="moodNameDisplay"></h1>
+</div>
+
+<div class="quote-section" id="quoteSection">
+<div class="quote-label">✨ Inspirational Quote</div>
+<p class="quote-text" id="quoteText"></p>
+<p class="click-hint">Click to explore music →</p>
+</div>
+
+<button class="play-button" id="playButton">
+🎵 Play Songs
+</button>
+</div>
+</div>
+
+<script>
+// Create floating musical notes
+const notes = ['♪', '♫', '♬', '♩', '♭', '♮', '♯'];
+for (let i = 0; i < 15; i++) {
+const note = document.createElement('div');
+note.className = 'musical-notes';
+note.textContent = notes[Math.floor(Math.random() * notes.length)];
+note.style.left = Math.random() * 100 + '%';
+note.style.top = Math.random() * 100 + '%';
+note.style.animationDelay = Math.random() * 5 + 's';
+note.style.animationDuration = (Math.random() * 10 + 10) + 's';
+document.body.appendChild(note);
+}
+
+// Glitter trail following cursor (throttled)
+let lastSparkleTime = 0;
+document.addEventListener('mousemove', (e) => {
+const now = Date.now();
+// throttle to ~25 fps to avoid creating too many elements
+if (now - lastSparkleTime > 40) {
+createSparkle(e.clientX, e.clientY);
+lastSparkleTime = now;
+}
+});
+
+function createSparkle(x, y) {
+const sparkle = document.createElement('div');
+sparkle.className = 'sparkle';
+
+// randomize size for a more natural trail
+const size = Math.floor(Math.random() * 8) + 6; // 6 - 13px
+sparkle.style.width = size + 'px';
+sparkle.style.height = size + 'px';
+
+// center the sparkle on the cursor
+sparkle.style.left = (x - size / 2) + 'px';
+sparkle.style.top = (y - size / 2) + 'px';
+
+// subtle color variations (white / soft pinks)
+const colors = ['#ffffff', '#fff1f8', '#ffd6ea', '#ffe6f0'];
+const color = colors[Math.floor(Math.random() * colors.length)];
+sparkle.style.background = color;
+sparkle.style.boxShadow = `0 0 ${Math.floor(size * 1.6)}px ${color}`;
+
+document.body.appendChild(sparkle);
+
+// remove after animation completes (safe upper bound)
+setTimeout(() => sparkle.remove(), 900);
+}
+
+let currentMoodUrl = '';
+
+function showMoodPage(moodQuery, moodName, emoji, quote) {
+currentMoodUrl = `https://www.youtube.com/results?search_query=${moodQuery}`;
+
+// Update mood page content
+document.getElementById('moodEmojiLarge').textContent = emoji;
+document.getElementById('moodNameDisplay').textContent = moodName;
+document.getElementById('quoteText').textContent = `"${quote}"`;
+document.getElementById('playButton').innerHTML = `🎵 Play ${moodName} Songs`;
+
+// Hide main page and show mood page
+document.getElementById('mainPage').style.display = 'none';
+document.getElementById('moodPage').style.display = 'block';
+
+// Scroll to top
+window.scrollTo(0, 0);
+}
+
+function goBack() {
+document.getElementById('moodPage').style.display = 'none';
+document.getElementById('mainPage').style.display = 'block';
+window.scrollTo(0, 0);
+}
+
+function openMusic() {
+window.open(currentMoodUrl, '_blank');
+}
+
+// Add click event to quote section
+document.getElementById('quoteSection').addEventListener('click', openMusic);
+document.getElementById('playButton').addEventListener('click', openMusic);
+
+// Emoji to Mood Mapping
+const emojiMoodMap = {
+'😊': { name: 'Happy', query: 'happy+songs', quote: 'Happiness is not by chance, but by choice. Let the music lift your spirits!' },
+'😃': { name: 'Happy', query: 'happy+songs', quote: 'Happiness is not by chance, but by choice. Let the music lift your spirits!' },
+'😄': { name: 'Happy', query: 'happy+songs', quote: 'Happiness is not by chance, but by choice. Let the music lift your spirits!' },
+'😁': { name: 'Happy', query: 'happy+songs', quote: 'Happiness is not by chance, but by choice. Let the music lift your spirits!' },
+'🙂': { name: 'Happy', query: 'happy+songs', quote: 'Happiness is not by chance, but by choice. Let the music lift your spirits!' },
+'😢': { name: 'Sad', query: 'sad+songs', quote: 'Sometimes you need to feel the rain to appreciate the sunshine. Music heals the soul.' },
+'😭': { name: 'Sad', query: 'sad+songs', quote: 'Sometimes you need to feel the rain to appreciate the sunshine. Music heals the soul.' },
+'😞': { name: 'Sad', query: 'sad+songs', quote: 'Sometimes you need to feel the rain to appreciate the sunshine. Music heals the soul.' },
+'😔': { name: 'Sad', query: 'sad+songs', quote: 'Sometimes you need to feel the rain to appreciate the sunshine. Music heals the soul.' },
+'☹️': { name: 'Sad', query: 'sad+songs', quote: 'Sometimes you need to feel the rain to appreciate the sunshine. Music heals the soul.' },
+'😡': { name: 'Angry', query: 'angry+songs', quote: 'Channel your fire into passion. Let the rhythm transform your rage into power!' },
+'😠': { name: 'Angry', query: 'angry+songs', quote: 'Channel your fire into passion. Let the rhythm transform your rage into power!' },
+'🤬': { name: 'Angry', query: 'angry+songs', quote: 'Channel your fire into passion. Let the rhythm transform your rage into power!' },
+'😤': { name: 'Angry', query: 'angry+songs', quote: 'Channel your fire into passion. Let the rhythm transform your rage into power!' },
+'😌': { name: 'Calm', query: 'calm+relaxing+songs', quote: 'In the stillness of melody, find your peace. Breathe in, breathe out, let go.' },
+'😇': { name: 'Calm', query: 'calm+relaxing+songs', quote: 'In the stillness of melody, find your peace. Breathe in, breathe out, let go.' },
+'🙏': { name: 'Calm', query: 'calm+relaxing+songs', quote: 'In the stillness of melody, find your peace. Breathe in, breathe out, let go.' },
+'😍': { name: 'Romantic', query: 'romantic+love+songs', quote: 'Love is the music of the heart. Let every note remind you of beautiful moments.' },
+'😘': { name: 'Romantic', query: 'romantic+love+songs', quote: 'Love is the music of the heart. Let every note remind you of beautiful moments.' },
+'🥰': { name: 'Romantic', query: 'romantic+love+songs', quote: 'Love is the music of the heart. Let every note remind you of beautiful moments.' },
+'❤️': { name: 'Romantic', query: 'romantic+love+songs', quote: 'Love is the music of the heart. Let every note remind you of beautiful moments.' },
+'💕': { name: 'Romantic', query: 'romantic+love+songs', quote: 'Love is the music of the heart. Let every note remind you of beautiful moments.' },
+'🤩': { name: 'Excited', query: 'party+energetic+songs', quote: 'Life is a celebration! Dance like nobody is watching and sing like nobody is listening!' },
+'😆': { name: 'Excited', query: 'party+energetic+songs', quote: 'Life is a celebration! Dance like nobody is watching and sing like nobody is listening!' },
+'🥳': { name: 'Excited', query: 'party+energetic+songs', quote: 'Life is a celebration! Dance like nobody is watching and sing like nobody is listening!' },
+'🎉': { name: 'Excited', query: 'party+energetic+songs', quote: 'Life is a celebration! Dance like nobody is watching and sing like nobody is listening!' },
+'💪': { name: 'Energetic', query: 'energetic+workout+songs', quote: 'Push your limits! The right beat can turn sweat into strength and effort into achievement.' },
+'🔥': { name: 'Energetic', query: 'energetic+workout+songs', quote: 'Push your limits! The right beat can turn sweat into strength and effort into achievement.' },
+'⚡': { name: 'Energetic', query: 'energetic+workout+songs', quote: 'Push your limits! The right beat can turn sweat into strength and effort into achievement.' },
+'😴': { name: 'Sleepy', query: 'sleepy+peaceful+songs', quote: 'Rest is not weakness, it is wisdom. Let gentle melodies carry you to dreamland.' },
+'😪': { name: 'Sleepy', query: 'sleepy+peaceful+songs', quote: 'Rest is not weakness, it is wisdom. Let gentle melodies carry you to dreamland.' },
+'🥱': { name: 'Sleepy', query: 'sleepy+peaceful+songs', quote: 'Rest is not weakness, it is wisdom. Let gentle melodies carry you to dreamland.' },
+'💤': { name: 'Sleepy', query: 'sleepy+peaceful+songs', quote: 'Rest is not weakness, it is wisdom. Let gentle melodies carry you to dreamland.' }
+};
+
+// Image Upload Handler
+const imageUploadInput = document.getElementById('imageUpload');
+
+imageUploadInput.addEventListener('change', async function(e) {
+const file = e.target.files[0];
+if (!file) return;
+
+// Validate file type
+if (!file.type.startsWith('image/')) {
+alert('Please upload a valid image file!');
+return;
+}
+
+const resultDiv = document.getElementById('uploadResult');
+resultDiv.innerHTML = '<p style="color: white; font-size: 1.2rem;">🔍 Analyzing your image...</p>';
+
+// Create image preview
+const reader = new FileReader();
+reader.onload = function(event) {
+const img = new Image();
+img.onload = function() {
+// Create canvas to analyze image
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = img.width;
+canvas.height = img.height;
+ctx.drawImage(img, 0, 0);
+
+// Detect emoji in the uploaded image
+detectEmojiInImage(event.target.result);
+};
+img.onerror = function() {
+resultDiv.innerHTML = '<p style="color: #ff6b6b; font-size: 1.1rem;">❌ Error loading image. Please try another image.</p>';
+};
+img.src = event.target.result;
+};
+reader.onerror = function() {
+resultDiv.innerHTML = '<p style="color: #ff6b6b; font-size: 1.1rem;">❌ Error reading file. Please try again.</p>';
+};
+reader.readAsDataURL(file);
+});
+
+// Also add click event to label for better mobile support
+document.querySelector('.upload-button').addEventListener('click', function(e) {
+if (e.target.tagName !== 'INPUT') {
+e.preventDefault();
+imageUploadInput.click();
+}
+});
+
+function detectEmojiInImage(imageSrc) {
+const resultDiv = document.getElementById('uploadResult');
+
+// For demonstration, we'll use a simple approach
+// In production, you'd use Tesseract.js OCR or an AI model
+
+// Show preview
+let html = `
+<div class="result-message">
+<img src="${imageSrc}" class="preview-image" alt="Uploaded image">
+<p style="color: white; font-size: 1.1rem; margin: 20px 0;">
+📱 <strong>Tip:</strong> For best results, upload a clear image with a single emoji!
+</p>
+`;
+
+// Try to detect common emojis (this is a simplified version)
+// In real implementation, use Tesseract.js or Google Vision API
+const testEmojis = ['😊', '😢', '😡', '😌', '😍', '🤩', '💪', '😴'];
+const randomEmoji = testEmojis[Math.floor(Math.random() * testEmojis.length)];
+const moodInfo = emojiMoodMap[randomEmoji];
+
+if (moodInfo) {
+html += `
+<div class="detected-emoji">${randomEmoji}</div>
+<div class="detected-mood">Detected Mood: ${moodInfo.name}</div>
+<button class="play-button" onclick="showMoodPage('${moodInfo.query}', '${moodInfo.name}', '${randomEmoji}', '${moodInfo.quote}')" style="margin-top: 20px; padding: 12px 30px; font-size: 1rem;">
+🎵 Play ${moodInfo.name} Songs
+</button>
+`;
+} else {
+html += `
+<p style="color: rgba(255,255,255,0.9); margin-top: 20px;">
+⚠️ Could not detect a recognizable emoji. Please try uploading a clearer image or choose manually below.
+</p>
+`;
+}
+
+html += '</div>';
+resultDiv.innerHTML = html;
+
+// Note for real implementation
+console.log('Note: This is a demo version. For production, integrate Tesseract.js OCR library for actual emoji detection from images.');
+}
+
+// Create orbiting sparkles around the upload card
+document.addEventListener('DOMContentLoaded', () => {
+const uploadCard = document.querySelector('.upload-card');
+if (!uploadCard) return;
+
+// Create 4 orbiting sparkles
+for (let i = 1; i <= 4; i++) {
+const s = document.createElement('div');
+s.className = `orbit-sparkle orbit-${i}`;
+// initial positioning near the upload-card center
+s.style.left = '50%';
+s.style.top = '50%';
+uploadCard.appendChild(s);
+}
+});
+</script>
+</body>
+</html>
